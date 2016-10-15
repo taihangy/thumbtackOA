@@ -1,15 +1,7 @@
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Array;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+
 import java.util.*;
 
-public class thumbtack {
+public class Thumbtack {
 	private static HashMap<String, String> updateMap = new HashMap<>();
 	private static HashMap<String, Integer> countMap = new HashMap<>();
 	private static StringBuilder reverseCommand = new StringBuilder();
@@ -31,46 +23,52 @@ public class thumbtack {
 		String[] strs = str.split(" ");
 		switch(strs[0]) {
 		case "SET":
-			if (strs.length < 3) System.out.println("wrong SET info");
+			if (strs.length < 3) System.out.println("Usage: SET a 10");
 			else {
 				set(strs[1], strs[2]);
 				reverseCommand.append(str + ",");
 			}
 			break;
 		case "GET":
-			if (strs.length < 2) System.out.println("wrong GET info");
+			if (strs.length < 2) System.out.println("Usage: GET a");
 			else get(strs[1]);
 			break;
 		case "UNSET":
-			if (strs.length < 2) System.out.println("wrong UNSET info");
+			if (strs.length < 2) System.out.println("Usage: UNSET a");
 			else {
 				set(strs[1], "NULL");
 				reverseCommand.append(str + ",");
 			}
 			break;
+		case "NUMEQUALTO":
+			if (strs.length < 2) System.out.println("Usage: NUMEQUALTO a");
+			else numEqualTo(strs[1]);
+			break;
+		case "BEGIN":
+			if (strs.length > 1) System.out.println("Usage: BEGIN");
+			else {
+				reverseCommand.append("|");
+				state = true;
+			}
+			break;
 		case "COMMIT":
-			if (!state) System.out.println("> NO TRANSACTION");
+			if (strs.length > 1) System.out.println("Usage: COMMIT");
+			else if (!state) System.out.println("> NO TRANSACTION");
 			else {
 				reverseCommand.setLength(0);
 				state = false;
 			}
 			break;
-		case "NUMEQUALTO":
-			if (strs.length < 2) System.out.println("wrong NUMEQUALTO info");
-			else numEqualTo(strs[1]);
-			break;
-		case "BEGIN":
-			reverseCommand.append("|");
-			state = true;
-			break;
 		case "ROLLBACK":
-			if (!state) System.out.println("> NO TRANSACTION");
+			if (strs.length > 1) System.out.println("Usage: ROLLBACK");
+			else if (!state) System.out.println("> NO TRANSACTION");
 			else {
 				rollBack();
 				state = false;
 			}
 			break;
 		default:
+			System.out.println("Usage:\nSET a 10\nGET a\nUNSET a\nNUMEQUALTO a\nBEGIN\nCOMMIT\nROLLBACK");
 			break;
 		}
 	}
@@ -98,7 +96,7 @@ public class thumbtack {
 		reverseCommand.delete(index, reverseCommand.length());
 		String[] transactions = reverseCommand.toString().split("\\|");
 		for (String transactionBlock: transactions) {
-			if (transactions.length == 1 && transactionBlock.isEmpty()) { // only one begin
+			if (transactions.length == 1 && transactionBlock.isEmpty()) { // only one begin in transactions
 				for (String key: updateMap.keySet()) {
 					countMap.put(updateMap.get(key), countMap.get(updateMap.get(key))-1);
 					set(key, "NULL");	
