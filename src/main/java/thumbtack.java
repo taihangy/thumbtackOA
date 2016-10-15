@@ -28,7 +28,6 @@ public class thumbtack {
 	
 	private static void parseStr(String str) {
 		String[] strs = str.split(" ");
-		System.out.println(str);
 		switch(strs[0]) {
 		case "SET":
 			if (strs.length < 3) System.out.println("wrong SET info");
@@ -71,22 +70,18 @@ public class thumbtack {
 	}
 	
 	private static void set(String key, String val) {
-		if (!updateMap.containsKey(key)) {
-			updateMap.put(key, val);
-			countMap.put(val, countMap.getOrDefault(val, 0)+1);
+		String oldVal = updateMap.get(key);
+		if (oldVal != null && oldVal != val) {
+			countMap.put(oldVal, countMap.get(oldVal) - 1);
 		}
-		else {
-			if (updateMap.containsKey(key)) {
-				String oldVal = updateMap.get(key);
-				countMap.put(oldVal, countMap.get(oldVal)-1);
-			}
-			updateMap.put(key, val);
-			countMap.put(val, countMap.getOrDefault(val, 0)+1);
-		}
+		updateMap.put(key, val);
+		countMap.put(val, countMap.getOrDefault(val, 0) + 1);
 	}
 	
 	private static void get(String key) {
-		System.out.println("> " + updateMap.get(key));
+		String res = updateMap.get(key);
+		if (res == null || res.equals("NULL")) return;
+		System.out.println("> " + res);
 	}
 	
 	private static void numEqualTo(String key) {
@@ -96,26 +91,26 @@ public class thumbtack {
 	private static void rollBack() {
 		int index = reverseCommand.toString().lastIndexOf("|");
 		reverseCommand.delete(index, reverseCommand.length());
-		String[] commands = reverseCommand.toString().split("\\|");
-		for (String command: commands) {
-			if ((command.length() == 0 && commands.length == 1) || commands == null) {
+		String[] transactions = reverseCommand.toString().split("\\|");
+		for (String transactionBlock: transactions) {
+			if (transactions.length == 1 && transactionBlock.isEmpty()) { // only one begin
 				for (String key: updateMap.keySet()) {
 					countMap.put(updateMap.get(key), countMap.get(updateMap.get(key))-1);
 					set(key, "NULL");	
 				}
-				break; // corner case: BEGIN is the first command
 			}
-			String[] actions = command.split(",");
-			for (String act: actions) {
-				String[] each = act.split(" ");
-				switch (each[0]) {
-				case "SET":
-					set(each[1], each[2]);
-					break;
-				case "UNSET":
-					set(each[1], "NULL");
-				default:
-					break;
+			else {
+				String[] commands = transactionBlock.split(",");
+				for (String command: commands) {
+					command = command.trim();
+					String[] each = command.split(" ");
+					switch (each[0]) {
+						case "SET":
+							set(each[1], each[2]);
+							break;
+						case "UNSET":
+							set(each[1], "NULL");
+					}
 				}
 			}
 		}
