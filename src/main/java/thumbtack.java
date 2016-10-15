@@ -18,7 +18,6 @@ public class thumbtack {
 		while(scan.hasNextLine() ) {
 			String cur = scan.nextLine();
 			if (cur.equals("END")) {
-				System.out.println("END");
 				scan.close();
 				System.exit(0);
 			}
@@ -59,8 +58,7 @@ public class thumbtack {
 			reverseCommand.append("|");
 			break;
 		case "ROLLBACK":
-			if (reverseCommand.length() == 0) System.out.println("> NO TRANSACTION");
-			else {
+			if (reverseCommand.length() != 0) {
 				rollBack();
 			}
 			break;
@@ -80,7 +78,6 @@ public class thumbtack {
 	
 	private static void get(String key) {
 		String res = updateMap.get(key);
-		if (res == null || res.equals("NULL")) return;
 		System.out.println("> " + res);
 	}
 	
