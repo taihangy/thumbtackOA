@@ -10,9 +10,11 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class thumbtack {
-	static HashMap<String, String> updateMap = new HashMap<>();
-	static HashMap<String, Integer> countMap = new HashMap<>();
-	static StringBuilder reverseCommand = new StringBuilder();
+	private static HashMap<String, String> updateMap = new HashMap<>();
+	private static HashMap<String, Integer> countMap = new HashMap<>();
+	private static StringBuilder reverseCommand = new StringBuilder();
+	private static boolean state = false;
+
 	public static void main(String[] args) {
 		Scanner scan = new Scanner(System.in);
 		while(scan.hasNextLine() ) {
@@ -47,8 +49,11 @@ public class thumbtack {
 			}
 			break;
 		case "COMMIT":
-			if (reverseCommand.length() == 0) System.out.println("> NO TRANSACTION");
-			else reverseCommand.setLength(0);
+			if (!state) System.out.println("> NO TRANSACTION");
+			else {
+				reverseCommand.setLength(0);
+				state = false;
+			}
 			break;
 		case "NUMEQUALTO":
 			if (strs.length < 2) System.out.println("wrong NUMEQUALTO info");
@@ -56,10 +61,13 @@ public class thumbtack {
 			break;
 		case "BEGIN":
 			reverseCommand.append("|");
+			state = true;
 			break;
 		case "ROLLBACK":
-			if (reverseCommand.length() != 0) {
+			if (!state) System.out.println("> NO TRANSACTION");
+			else {
 				rollBack();
+				state = false;
 			}
 			break;
 		default:
